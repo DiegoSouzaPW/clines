@@ -19,7 +19,7 @@
 <td align="center">
 <a href="https://cline.bot/join-us" target="_blank"><strong>We're Hiring!</strong></a>
 </td>
-</tbody>
+</tbody> 
 </table>
 </div>
 
