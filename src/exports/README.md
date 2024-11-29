@@ -1,54 +1,54 @@
-# Cline API
+# CDWA CLI Agent API
 
-The Cline extension exposes an API that can be used by other extensions. To use this API in your extension:
+The CDWA CLI Agent extension exposes an API that can be used by other extensions. To use this API in your extension:
 
 1. Copy `src/extension-api/cline.d.ts` to your extension's source directory.
 2. Include `cline.d.ts` in your extension's compilation.
 3. Get access to the API with the following code:
 
     ```ts
-    const clineExtension = vscode.extensions.getExtension<ClineAPI>("saoudrizwan.claude-dev")
+    const cdwaExtension = vscode.extensions.getExtension<ClineAPI>("diegosouzapw.cdwacliagent")
 
-    if (!clineExtension?.isActive) {
-    	throw new Error("Cline extension is not activated")
+    if (!cdwaExtension?.isActive) {
+    	throw new Error("CDWA CLI Agent extension is not activated")
     }
 
-    const cline = clineExtension.exports
+    const agent = cdwaExtension.exports
 
-    if (cline) {
+    if (agent) {
     	// Now you can use the API
 
     	// Set custom instructions
-    	await cline.setCustomInstructions("Talk like a pirate")
+    	await agent.setCustomInstructions("Talk like a pirate")
 
     	// Get custom instructions
-    	const instructions = await cline.getCustomInstructions()
+    	const instructions = await agent.getCustomInstructions()
     	console.log("Current custom instructions:", instructions)
 
     	// Start a new task with an initial message
-    	await cline.startNewTask("Hello, Cline! Let's make a new project...")
+    	await agent.startNewTask("Hello! Let's make a new project...")
 
     	// Start a new task with an initial message and images
-    	await cline.startNewTask("Use this design language", ["data:image/webp;base64,..."])
+    	await agent.startNewTask("Use this design language", ["data:image/webp;base64,..."])
 
     	// Send a message to the current task
-    	await cline.sendMessage("Can you fix the @problems?")
+    	await agent.sendMessage("Can you fix the @problems?")
 
     	// Simulate pressing the primary button in the chat interface (e.g. 'Save' or 'Proceed While Running')
-    	await cline.pressPrimaryButton()
+    	await agent.pressPrimaryButton()
 
     	// Simulate pressing the secondary button in the chat interface (e.g. 'Reject')
-    	await cline.pressSecondaryButton()
+    	await agent.pressSecondaryButton()
     } else {
-    	console.error("Cline API is not available")
+    	console.error("CDWA CLI Agent API is not available")
     }
     ```
 
-    **Note:** To ensure that the `saoudrizwan.claude-dev` extension is activated before your extension, add it to the `extensionDependencies` in your `package.json`:
+    **Note:** To ensure that the `diegosouzapw.cdwacliagent` extension is activated before your extension, add it to the `extensionDependencies` in your `package.json`:
 
     ```json
     "extensionDependencies": [
-        "saoudrizwan.claude-dev"
+        "diegosouzapw.cdwacliagent"
     ]
     ```
 

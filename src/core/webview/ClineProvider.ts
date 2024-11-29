@@ -65,20 +65,20 @@ export const GlobalFileNames = {
 }
 
 export class ClineProvider implements vscode.WebviewViewProvider {
-	public static readonly sideBarId = "claude-dev.SidebarProvider" // used in package.json as the view's id. This value cannot be changed due to how vscode caches views based on their id, and updating the id would break existing instances of the extension.
-	public static readonly tabPanelId = "claude-dev.TabPanelProvider"
+	public static readonly sideBarId = "cdwacliagent.SidebarProvider"
+	public static readonly tabPanelId = "cdwacliagent.TabPanelProvider"
 	private static activeInstances: Set<ClineProvider> = new Set()
 	private disposables: vscode.Disposable[] = []
 	private view?: vscode.WebviewView | vscode.WebviewPanel
-	private cline?: Cline
+	private agent?: Cline
 	private workspaceTracker?: WorkspaceTracker
-	private latestAnnouncementId = "oct-28-2024" // update to some unique identifier when we add a new announcement
+	private latestAnnouncementId = "oct-28-2024"
 
 	constructor(
 		readonly context: vscode.ExtensionContext,
 		private readonly outputChannel: vscode.OutputChannel,
 	) {
-		this.outputChannel.appendLine("ClineProvider instantiated")
+		this.outputChannel.appendLine("CDWA CLI Agent Provider instantiated")
 		ClineProvider.activeInstances.add(this)
 		this.workspaceTracker = new WorkspaceTracker(this)
 	}
@@ -192,13 +192,13 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	async initClineWithTask(task?: string, images?: string[]) {
 		await this.clearTask() // ensures that an exising task doesn't exist before starting a new one, although this shouldn't be possible since user must clear task before starting a new one
 		const { apiConfiguration, customInstructions, alwaysAllowReadOnly } = await this.getState()
-		this.cline = new Cline(this, apiConfiguration, customInstructions, alwaysAllowReadOnly, task, images)
+		this.agent = new Cline(this, apiConfiguration, customInstructions, alwaysAllowReadOnly, task, images)
 	}
 
 	async initClineWithHistoryItem(historyItem: HistoryItem) {
 		await this.clearTask()
 		const { apiConfiguration, customInstructions, alwaysAllowReadOnly } = await this.getState()
-		this.cline = new Cline(
+		this.agent = new Cline(
 			this,
 			apiConfiguration,
 			customInstructions,
@@ -284,7 +284,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data:; script-src 'nonce-${nonce}';">
             <link rel="stylesheet" type="text/css" href="${stylesUri}">
 			<link href="${codiconsUri}" rel="stylesheet" />
-            <title>Cline</title>
+            <title>CDWA CLI Agent</title>
           </head>
           <body>
             <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -397,8 +397,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							await this.updateGlobalState("azureApiVersion", azureApiVersion)
 							await this.updateGlobalState("openRouterModelId", openRouterModelId)
 							await this.updateGlobalState("openRouterModelInfo", openRouterModelInfo)
-							if (this.cline) {
-								this.cline.api = buildApiHandler(message.apiConfiguration)
+							if (this.agent) {
+								this.agent.api = buildApiHandler(message.apiConfiguration)
 							}
 						}
 						await this.postStateToWebview()
@@ -408,13 +408,13 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					case "alwaysAllowReadOnly":
 						await this.updateGlobalState("alwaysAllowReadOnly", message.bool ?? undefined)
-						if (this.cline) {
-							this.cline.alwaysAllowReadOnly = message.bool ?? false
+						if (this.agent) {
+							this.agent.alwaysAllowReadOnly = message.bool ?? false
 						}
 						await this.postStateToWebview()
 						break
 					case "askResponse":
-						this.cline?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
+						this.agent?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
 						break
 					case "clearTask":
 						// newTask will start a new task with a given task text, while clear task resets the current session and allows for a new task to be started
@@ -430,7 +430,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						await this.postMessageToWebview({ type: "selectedImages", images })
 						break
 					case "exportCurrentTask":
-						const currentTaskId = this.cline?.taskId
+						const currentTaskId = this.agent?.taskId
 						if (currentTaskId) {
 							this.exportTaskWithId(currentTaskId)
 						}
@@ -468,17 +468,17 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						openMention(message.text)
 						break
 					case "cancelTask":
-						if (this.cline) {
-							const { historyItem } = await this.getTaskWithId(this.cline.taskId)
-							this.cline.abortTask()
-							await pWaitFor(() => this.cline === undefined || this.cline.didFinishAborting, {
+						if (this.agent) {
+							const { historyItem } = await this.getTaskWithId(this.agent.taskId)
+							this.agent.abortTask()
+							await pWaitFor(() => this.agent === undefined || this.agent.didFinishAborting, {
 								timeout: 3_000,
 							}).catch(() => {
 								console.error("Failed to abort task")
 							})
-							if (this.cline) {
+							if (this.agent) {
 								// 'abandoned' will prevent this cline instance from affecting future cline instance gui. this may happen if its hanging on a streaming request
-								this.cline.abandoned = true
+								this.agent.abandoned = true
 							}
 							await this.initClineWithHistoryItem(historyItem) // clears task again, so we need to abortTask manually above
 							// await this.postStateToWebview() // new Cline instance will post state when it's ready. having this here sent an empty messages array to webview leading to virtuoso having to reload the entire list
@@ -497,8 +497,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	async updateCustomInstructions(instructions?: string) {
 		// User may be clearing the field
 		await this.updateGlobalState("customInstructions", instructions || undefined)
-		if (this.cline) {
-			this.cline.customInstructions = instructions || undefined
+		if (this.agent) {
+			this.agent.customInstructions = instructions || undefined
 		}
 		await this.postStateToWebview()
 	}
@@ -561,8 +561,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		await this.updateGlobalState("apiProvider", openrouter)
 		await this.storeSecret("openRouterApiKey", apiKey)
 		await this.postStateToWebview()
-		if (this.cline) {
-			this.cline.api = buildApiHandler({ apiProvider: openrouter, openRouterApiKey: apiKey })
+		if (this.agent) {
+			this.agent.api = buildApiHandler({ apiProvider: openrouter, openRouterApiKey: apiKey })
 		}
 		// await this.postMessageToWebview({ type: "action", action: "settingsButtonClicked" }) // bad ux if user is on welcome
 	}
@@ -730,7 +730,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	}
 
 	async showTaskWithId(id: string) {
-		if (id !== this.cline?.taskId) {
+		if (id !== this.agent?.taskId) {
 			// non-current task
 			const { historyItem } = await this.getTaskWithId(id)
 			await this.initClineWithHistoryItem(historyItem) // clears existing task
@@ -744,7 +744,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	}
 
 	async deleteTaskWithId(id: string) {
-		if (id === this.cline?.taskId) {
+		if (id === this.agent?.taskId) {
 			await this.clearTask()
 		}
 
@@ -792,15 +792,15 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			customInstructions,
 			alwaysAllowReadOnly,
 			uriScheme: vscode.env.uriScheme,
-			clineMessages: this.cline?.clineMessages || [],
+			clineMessages: this.agent?.clineMessages || [],
 			taskHistory: (taskHistory || []).filter((item) => item.ts && item.task).sort((a, b) => b.ts - a.ts),
 			shouldShowAnnouncement: lastShownAnnouncementId !== this.latestAnnouncementId,
 		}
 	}
 
 	async clearTask() {
-		this.cline?.abortTask()
-		this.cline = undefined // removes reference to it, so once promises end it will be garbage collected
+		this.agent?.abortTask()
+		this.agent = undefined // removes reference to it, so once promises end it will be garbage collected
 	}
 
 	// Caching mechanism to keep track of webview messages + API conversation history per provider instance
@@ -1034,9 +1034,9 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		for (const key of secretKeys) {
 			await this.storeSecret(key, undefined)
 		}
-		if (this.cline) {
-			this.cline.abortTask()
-			this.cline = undefined
+		if (this.agent) {
+			this.agent.abortTask()
+			this.agent = undefined
 		}
 		vscode.window.showInformationMessage("State reset")
 		await this.postStateToWebview()

@@ -1,6 +1,6 @@
 {
-	"name": "claude-dev",
-	"displayName": "Cline (prev. Claude Dev)",
+	"name": "cdwacliagent",
+	"displayName": "CDWA CLI Agent",
 	"description": "Autonomous coding agent right in your IDE, capable of creating/editing files, running commands, using the browser, and more with your permission every step of the way.",
 	"version": "2.1.6",
 	"icon": "assets/icons/icon.png",
@@ -12,15 +12,15 @@
 		"vscode": "^1.84.0"
 	},
 	"author": {
-		"name": "Cline Bot Inc."
+		"name": "CDWA Bot Inc"
 	},
 	"license": "Apache-2.0",
-	"publisher": "saoudrizwan",
+	"publisher": "diegosouzapw",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/cline/cline"
+		"url": "https://github.com/cdwa/cdwacliagent"
 	},
-	"homepage": "https://cline.bot",
+	"homepage": "https://cdwa.bot",
 	"categories": [
 		"AI",
 		"Chat",
@@ -30,17 +30,13 @@
 		"Testing"
 	],
 	"keywords": [
-		"cline",
-		"claude",
-		"dev",
-		"openrouter",
-		"coding",
+		"cdwa",
+		"cli",
 		"agent",
 		"autonomous",
-		"chatgpt",
-		"sonnet",
+		"coding",
 		"ai",
-		"llama"
+		"assistant"
 	],
 	"activationEvents": [],
 	"main": "./dist/extension.js",
@@ -48,69 +44,69 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "claude-dev-ActivityBar",
-					"title": "Cline",
+					"id": "cdwacliagent-ActivityBar",
+					"title": "CDWA Agent",
 					"icon": "$(robot)"
 				}
 			]
 		},
 		"views": {
-			"claude-dev-ActivityBar": [
+			"cdwacliagent-ActivityBar": [
 				{
 					"type": "webview",
-					"id": "claude-dev.SidebarProvider",
+					"id": "cdwacliagent.SidebarProvider",
 					"name": ""
 				}
 			]
 		},
 		"commands": [
 			{
-				"command": "cline.plusButtonClicked",
+				"command": "cdwacliagent.plusButtonClicked",
 				"title": "New Task",
 				"icon": "$(add)"
 			},
 			{
-				"command": "cline.historyButtonClicked",
+				"command": "cdwacliagent.historyButtonClicked",
 				"title": "History",
 				"icon": "$(history)"
 			},
 			{
-				"command": "cline.popoutButtonClicked",
+				"command": "cdwacliagent.popoutButtonClicked",
 				"title": "Open in Editor",
 				"icon": "$(link-external)"
 			},
 			{
-				"command": "cline.settingsButtonClicked",
+				"command": "cdwacliagent.settingsButtonClicked",
 				"title": "Settings",
 				"icon": "$(settings-gear)"
 			},
 			{
-				"command": "cline.openInNewTab",
+				"command": "cdwacliagent.openInNewTab",
 				"title": "Open In New Tab",
-				"category": "Cline"
+				"category": "CDWA Agent"
 			}
 		],
 		"menus": {
 			"view/title": [
 				{
-					"command": "cline.plusButtonClicked",
+					"command": "cdwacliagent.plusButtonClicked",
 					"group": "navigation@1",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cdwacliagent.SidebarProvider"
 				},
 				{
-					"command": "cline.historyButtonClicked",
+					"command": "cdwacliagent.historyButtonClicked",
 					"group": "navigation@2",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cdwacliagent.SidebarProvider"
 				},
 				{
-					"command": "cline.popoutButtonClicked",
+					"command": "cdwacliagent.popoutButtonClicked",
 					"group": "navigation@3",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cdwacliagent.SidebarProvider"
 				},
 				{
-					"command": "cline.settingsButtonClicked",
+					"command": "cdwacliagent.settingsButtonClicked",
 					"group": "navigation@4",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cdwacliagent.SidebarProvider"
 				}
 			]
 		}
@@ -134,7 +130,8 @@
 		"start:webview": "cd webview-ui && npm run start",
 		"build:webview": "cd webview-ui && npm run build",
 		"test:webview": "cd webview-ui && npm run test",
-		"publish:marketplace": "vsce publish && ovsx publish"
+		"publish:marketplace": "vsce publish && ovsx publish",
+		"publish:only-vsix": "npx @vscode/vsce package"
 	},
 	"devDependencies": {
 		"@types/diff": "^5.2.1",
@@ -145,9 +142,11 @@
 		"@typescript-eslint/parser": "^7.11.0",
 		"@vscode/test-cli": "^0.0.9",
 		"@vscode/test-electron": "^2.4.0",
+		"@vscode/vsce": "^3.2.1",
 		"esbuild": "^0.21.5",
 		"eslint": "^8.57.0",
 		"npm-run-all": "^4.1.5",
+		"ovsx": "^0.10.1",
 		"prettier": "^3.3.3",
 		"typescript": "^5.4.5"
 	},
